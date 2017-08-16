@@ -4,7 +4,16 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/gopherjs/vecty"
 	"github.com/gopherjs/vecty/elem"
+	"github.com/gopherjs/vecty/event"
 	"github.com/gopherjs/vecty/prop"
+	"github.com/gopherjs/vecty/storeutil"
+	"github.com/nilslice/gopherjs/routing/actions"
+	"github.com/nilslice/gopherjs/routing/dispatcher"
+	"github.com/nilslice/gopherjs/routing/store"
+)
+
+var (
+	Listeners = storeutil.NewListenerRegistry()
 )
 
 type Home struct {
@@ -19,6 +28,10 @@ type Nav struct {
 	links map[string]string
 }
 
+func (n *Nav) onClick(ev *vecty.Event) {
+	print(ev.Target.Get("innerText"))
+}
+
 func (n *Nav) Render() *vecty.HTML {
 	var listItems []vecty.MarkupOrComponentOrHTML
 	for display, path := range n.links {
@@ -27,6 +40,7 @@ func (n *Nav) Render() *vecty.HTML {
 				"a",
 				prop.Href(path),
 				vecty.Text(display),
+				event.Click(n.onClick),
 			),
 		))
 	}
@@ -38,6 +52,15 @@ type App struct {
 	vecty.Core
 
 	child vecty.MarkupOrComponentOrHTML
+	watch map[string]vecty.MarkupOrComponentOrHTML
+}
+
+func (a *App) handleChange(ev *vecty.Event) {
+	dispatcher.Dispatch(&actions.SetInputValue{
+		Value: ev.Target.Get("value").String(),
+	})
+
+	vecty.Rerender(a)
 }
 
 func (a *App) Render() *vecty.HTML {
@@ -50,6 +73,15 @@ func (a *App) Render() *vecty.HTML {
 				"Contact": "/contact",
 			},
 		},
+		vecty.Tag(
+			"input",
+			prop.Value(store.GetInputValue()),
+			event.Input(a.handleChange),
+		),
+		vecty.Tag(
+			"p",
+			vecty.Text(store.GetInputValue()),
+		),
 		a.child,
 	)
 }

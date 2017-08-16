@@ -5,8 +5,10 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/gopherjs/vecty"
+)
 
-	"github.com/ponzu-cms/go-client"
+var (
+	body vecty.Component
 )
 
 type Router struct {
@@ -31,43 +33,46 @@ func (r *Router) On(path string, fn handler) {
 func main() {
 	router := NewRouter()
 
-	router.On("/", indexHandler)
+	// router.On("/", indexHandler)
 	router.On("/:name", allHandler)
 
 	router.Start()
 }
 
-func indexHandler(ctx *js.Object, next handler) {
-	vecty.RenderBody(
-		&App{
-			child: &Home{
-				ctx: ctx,
-			},
-		},
-	)
+// func indexHandler(ctx *js.Object, next handler) {
+// 	vecty.RenderBody(
+// 		&App{
+// 			child: &Home{
+// 				ctx: ctx,
+// 			},
+// 		},
+// 	)
 
-	ponzu := client.New(client.Config{
-		Host: "http://0.0.0.0:8080",
-	})
+// 	ponzu := client.New(client.Config{
+// 		Host: "http://0.0.0.0:8080",
+// 	})
 
-	go func() {
-		resp, err := ponzu.Content("Thing", 1)
-		if err != nil {
-			println("Error", err)
-		}
+// 	go func() {
+// 		resp, err := ponzu.Content("Thing", 1)
+// 		if err != nil {
+// 			if !err.O
+// 			println("Error", err)
+// 		}
 
-		el := js.Global.Get("document").Call("querySelector", "h2")
-		el.Set("innerText", resp.Data[0]["name"].(string))
-	}()
+// 		el := js.Global.Get("document").Call("querySelector", "h2")
+// 		el.Set("innerText", resp.Data[0]["name"].(string))
+// 	}()
 
-}
+// }
 
 func allHandler(ctx *js.Object, next handler) {
-	vecty.RenderBody(
-		&App{
-			child: &Home{
-				ctx: ctx,
-			},
+	body = &App{
+		child: &Home{
+			ctx: ctx,
 		},
+	}
+
+	vecty.RenderBody(
+		body,
 	)
 }
