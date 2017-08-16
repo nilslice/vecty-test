@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/gopherjs/vecty"
 	"github.com/gopherjs/vecty/elem"
@@ -51,8 +53,8 @@ func (n *Nav) Render() *vecty.HTML {
 type App struct {
 	vecty.Core
 
-	child vecty.MarkupOrComponentOrHTML
-	watch map[string]vecty.MarkupOrComponentOrHTML
+	counter int
+	child   vecty.MarkupOrComponentOrHTML
 }
 
 func (a *App) handleChange(ev *vecty.Event) {
@@ -73,14 +75,17 @@ func (a *App) Render() *vecty.HTML {
 				"Contact": "/contact",
 			},
 		},
-		vecty.Tag(
-			"input",
+		elem.Input(
 			prop.Value(store.GetInputValue()),
 			event.Input(a.handleChange),
 		),
 		vecty.Tag(
 			"p",
 			vecty.Text(store.GetInputValue()),
+		),
+		vecty.Tag(
+			"p",
+			vecty.Text(fmt.Sprintf("%d", a.counter)),
 		),
 		a.child,
 	)
